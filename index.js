@@ -1,14 +1,16 @@
 const inquirer = require ("inquirer");
 const cTable = require('console.table');
-const dbIndex = require("./db/index")
+// const dbIndex = require("./db/index")
+const connection = require("./db/connection")
+const mysql = require("mysql");
 
 //INITIAL QUESTIONS:
-function initialQuestion() {
+function userQuestions() {
     inquirer
       .prompt([
         {
           type: "list",
-          name: "initialQuestion",
+          name: "userQuestions",
           message:"What would you like to do?",
           choices:[
             "View All Employees",
@@ -17,9 +19,9 @@ function initialQuestion() {
             "Add Employee",
             "Add Role",
             "Add Department",
-            "Update Employee",
-            "Update Role",
-            "Update Department"
+            "Update Employee/Role",
+            "Update Department",
+            "Quit"
           ]
         }
     ])
@@ -53,77 +55,31 @@ function initialQuestion() {
             case "Update Department":
                 updateDept();
                 break;
+            case "Quit":
+                quitQuestions();    
+                break;
         }
     });
 }
 
-//ONCE USER HAS COMPLETED THEIR 'TASK', THEY WILL BE PROMPTED WITH THE FOLLOWING:
-function whatNext() {
-    inquirer
-      .prompt([
-        {
-          type: "list",
-          name: "whatNext",
-          message:"What would you like to do?",
-          choices:[
-            "View All Employees",
-            "View All Employees by Department",
-            "View All Employees by Manager",
-            "Add Employee",
-            "Add Role",
-            "Add Department",
-            "Update Employee",
-            "Update Role",
-            "Update Department",
-            "Quit"
-          ]
-        }
-    ])
-    //depending on which answer, initiate next set of questions
-    .then(function(answer) {
-        switch (answer.action){
-            case "View All Employees": 
-                viewAll();
-                break;
-            case "View All Employees by Department":
-                viewByDept();
-                break;
-            case "View All Employees by Manager":
-                viewbyMan();
-                break;
-            case "Add Employee":
-                addEmployee();
-                break;
-            case "Add Role":
-                addRole();
-                break;
-            case "Add Department":
-                addDept();
-                break;
-            case "Update Employee":
-                updateEmployee();
-                break;
-            case "Update Role":
-                updateRole();
-                break;
-            case "Update Department": 
-                updateDept();
-                break;
-            case "Quit":
-                
-                break;
-        }
-    });
-}
+
+   
 
 //create functions:
-//function viewAll(){
-//     var query = "SELECT * FROM employee"
-//     connection.query(query)
-// }
-//function viewByDept(){
-    //
-//}
+function viewAll(){
+    var query = "SELECT * FROM employee"
+    connection.query(query, function(err, res) {
+        console.log(res);
+        userQuestions();
+    })
+}
+function viewByDept(){
+ var query = "SELECT name, id from employees.department ORDER BY id asc";
+ connection.query(query, function(err, res) {
+    console.log(res);
+    userQuestions();
+ });   
+}
 //function viewbyMan(){
     //
 //}
@@ -142,7 +98,7 @@ function addEmployee(){
         },
         {
             type: "prompt",
-            name:"role_od",
+            name:"role_id",
             message: "What is the employee's Role ID #?"
         },
         {
@@ -152,9 +108,42 @@ function addEmployee(){
         }
     ])
      .then(function(answer){
-         var query = "INSERT INTO employee"
+         connection.query(
+            "INSERT INTO employee SET ?",
+            {
+                first_name: answer.first_name,
+                last_name: answer.last_name,
+                role_id: answer.role_id,
+                manage_id: answer.manager_id
+            },
+            function(err) {
+                if (err) throw err;
+            }
+         ) 
+
      })
-     whatNext();
+     userQuestions();
+}
+
+function addRole() {
+    inquirer
+        .prompt([
+        {
+            type:"input",
+            name:"newRole",
+            message: "What is the title of the new role?"
+        },
+        {
+            type: "input",
+            name: "salary",
+            message: "What is the salary for this role?"
+        },
+        {
+            type:"",
+            name: "department_id",
+            message: "What department is this role in? (1 - Sales, 2 - Engineering, 3 - Finance, 4 - Legal)"
+        }
+    ])
 }
 
 function addDept() {
@@ -171,7 +160,7 @@ function addDept() {
                 if (err) throw err;
             })
         })
-        whatNext();
+        userQuestions();
 
 }
 //function removeEmployee(){
@@ -186,9 +175,9 @@ function addDept() {
 //     })
 // }
 //function updateRole(){}
-// quit(){}
+// quitQuestions(){}
 
     //only single digit allowed for manager id (make a code for that)
 
 //STARTS ENQUIRER:
-initialQuestion();
+userQuestions();

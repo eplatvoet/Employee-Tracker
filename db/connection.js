@@ -7,7 +7,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: process.env.MYSQL_PASSWORD,
+    password: "12345678",
     database: "employees"
 });
 
@@ -17,4 +17,3 @@ connection.connect(function(err) {
     //initial questions function:
 });
 
-conn
