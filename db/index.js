@@ -1,3 +1,6 @@
+const connection = require("./connection.js")
 //class db
 //contructor
-//queries to the db
+//store the queries in a class
+
+
