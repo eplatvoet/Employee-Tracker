@@ -15,7 +15,7 @@
   NONE
   
   ## INSTALLATION
-  Please run "npm i" to install the NPMs used in this assignment (MySQL, inquirer, & console.table, express.js).
+  Please run "npm i" to install the NPMs used in this assignment (more information can be found in the package.json file).
   
   ## QUESTIONS
   My GitHub username is *eplatvoet* & my profile can be found [here](https://github.com/eplatvoet) 
