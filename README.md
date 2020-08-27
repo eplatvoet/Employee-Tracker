@@ -6,7 +6,9 @@
   - [LICENSE](#LICENSE)  
   - [INSTALLATION](#INSTALLATION)   
   - [QUESTIONS](#QUESTIONS)  
-  - [CONTRIBUTIONS](#CONTRIBUTIONS)
+  - [CONTRIBUTIONS](#CONTRIBUTIONS)  
+  - [LINKS](#LINKS)  
+  - [SCREENSHOTS](#SCREENSHOTS)  
 
   ## DESCRIPTION
   For this assignment, we were instructed to create an employee tracker, where the user could utilize inquirer through the command line in order to add/view departments, roles, & employees, as well as update employee roles from a database. 
@@ -22,3 +24,10 @@
   
   ## CONTRIBUTIONS 
   I can be reached at erin.didomenico520@gmail.com if you have any other questions about this repository.
+
+  ## LINKS
+  - https://github.com/eplatvoet/Employee-Tracker  
+  - https://eplatvoet.github.io/Employee-Tracker/  
+
+  ## SCREENSHOTS
+  ![GIF](EmployeeTracker.gif)
