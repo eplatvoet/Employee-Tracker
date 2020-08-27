@@ -1,7 +1,6 @@
 const inquirer = require ("inquirer");
 const cTable = require('console.table');
-// const dbIndex = require("./db/index")
-const connection = require("./db/connection")
+const connection = require("./db/connection");
 const mysql = require("mysql");
 
 //INITIAL QUESTIONS:
@@ -9,33 +8,32 @@ function userQuestions() {
     inquirer
       .prompt([
         {
-          type: "list",
+          type: "rawlist",
           name: "userQuestions",
           message:"What would you like to do?",
           choices:[
             "View All Employees",
-            "View All Employees by Department",
-            "View All Employees by Manager",
+            "View All Departments",
+            "View All Roles",
             "Add Employee",
             "Add Role",
             "Add Department",
             "Update Employee/Role",
-            "Update Department",
             "Quit"
           ]
         }
     ])
     //USER'S CHOICE WILL LEAD TO A FOLLOW-UP FUNCTION
     .then(function(answer) {
-        switch (answer.action){
+        switch (answer.userQuestions){
             case "View All Employees": 
                 viewAll();
                 break;
-            case "View All Employees by Department":
-                viewByDept();
+            case "View All Departments":
+                viewDept();
                 break;
-            case "View All Employees by Manager":
-                viewbyMan();
+            case "View All Roles":
+                viewRoles();
                 break;
             case "Add Employee":
                 addEmployee();
@@ -46,14 +44,8 @@ function userQuestions() {
             case "Add Department":
                 addDept();
                 break;
-            case "Update Employee":
-                updateEmployee();
-                break;
-            case "Update Role":
-                updateRole();
-                break;
-            case "Update Department":
-                updateDept();
+            case "Update Employee/Role":
+                updateInfo();
                 break;
             case "Quit":
                 quitQuestions();    
@@ -62,27 +54,30 @@ function userQuestions() {
     });
 }
 
-
-   
-
-//create functions:
+//FUNCTIONS DEPENDING ON USER'S ANSWER, AND WILL REPROMPT USER ON INITIAL QUESTIONS
 function viewAll(){
     var query = "SELECT * FROM employee"
     connection.query(query, function(err, res) {
-        console.log(res);
+        console.table(res);
         userQuestions();
     })
 }
-function viewByDept(){
+
+function viewDept(){
  var query = "SELECT name, id from employees.department ORDER BY id asc";
  connection.query(query, function(err, res) {
-    console.log(res);
+    console.table(res);
     userQuestions();
  });   
 }
-//function viewbyMan(){
-    //
-//}
+function viewRoles(){
+    var query = "SELECT * from role"
+    connection.query(query, function(err, res){
+        console.table(res);
+        userQuestions();
+    })
+    
+}
 
 function addEmployee(){
     inquirer.prompt([
@@ -108,21 +103,13 @@ function addEmployee(){
         }
     ])
      .then(function(answer){
-         connection.query(
-            "INSERT INTO employee SET ?",
-            {
-                first_name: answer.first_name,
-                last_name: answer.last_name,
-                role_id: answer.role_id,
-                manage_id: answer.manager_id
-            },
-            function(err) {
-                if (err) throw err;
-            }
-         ) 
-
+        var query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)"; 
+        connection.query(query, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], function (err, res) {
+            if (err) throw err;
+            console.log(`${answer.first_name} ${answer.last_name} was successfully added to the database.`);
+            userQuestions();
+        })
      })
-     userQuestions();
 }
 
 function addRole() {
@@ -139,11 +126,19 @@ function addRole() {
             message: "What is the salary for this role?"
         },
         {
-            type:"",
+            type:"input",
             name: "department_id",
             message: "What department is this role in? (1 - Sales, 2 - Engineering, 3 - Finance, 4 - Legal)"
         }
     ])
+    .then(function(answer){
+        var query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+        connection.query(query, [answer.title, answer.salary, answer.department_id], function (err, res) {
+            if (err) throw err;
+            console.log(`The role "${answers.title}" was successfully added to the database.`);
+            userQuestions();
+        })
+    })
 }
 
 function addDept() {
@@ -156,13 +151,49 @@ function addDept() {
         .then(function(answer) {
             var query = "INSERT INTO department (name) VALUES (?)";
             connection.query(query, answer.newDept, function(err, res) {
-                console.log("new dept created successfully");
+                console.log(`The new department, ${answer.newDept}, was created successfully.`);
                 if (err) throw err;
+                userQuestions();
             })
         })
-        userQuestions();
 
 }
+
+function updateInfo(){
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "currentEmpID",
+                message: "What is the ID of the employee you would like to update?"
+            },
+            {
+                type: "input",
+                name: "newTitle",
+                message: "What is the title of their new role?"
+            },
+            {
+                type: "input",
+                name: "newSalary",
+                message: "What is their new salary?"
+            },
+            {
+                type: "input",
+                name: "newRoleID",
+                message: "What department will this role belong to? (1 - Sales, 2 - Engineering, 3 - Finance, 4 - Legal)"
+            }
+    ])
+        .then(function(answer) {
+            var query = "UPDATE role SET title = ?, salary = ?, department_id = ? WHERE id = ?";
+            connection.query(query, [answer.newTitle, answer.newSalary, answer.newRoleID, parseInt(answer.currentEmpID)], function(err, res) {
+                if (err) throw err;
+                console.log("Employee Update was successful!");
+                userQuestions();
+            })
+        })
+}
+
+
 //function removeEmployee(){
 //     inquirer.prompt({
 //         type: "input",
@@ -174,10 +205,10 @@ function addDept() {
 
 //     })
 // }
-//function updateRole(){}
-// quitQuestions(){}
+function quitQuestions(){
+    process.exit();
+}
 
-    //only single digit allowed for manager id (make a code for that)
 
-//STARTS ENQUIRER:
+//STARTS INQUIRER:
 userQuestions();

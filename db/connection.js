@@ -17,3 +17,4 @@ connection.connect(function(err) {
     //initial questions function:
 });
 
+module.exports = connection;
